@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Imprimir | Amigos for Christ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#0A2240">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<style>
+:root{
+  --navy:#0A2240; --blue:#00758F; --hi:#96D1DE;
+  --bg:#F5EDEC; --surface:#FFFFFF; --line:#E3E0E7; --text:#414042; --text2:#414042;
+  --btn:#00758F; --btn-ink:#FFFFFF; --ok:#00758F; --err:#B3261E; --track:#E3E0E7;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#06182E; --surface:#0A2240; --line:#1C3A5E; --text:#F5EDEC; --text2:#96D1DE;
+    --ok:#96D1DE; --err:#FF9A8F; --track:#1C3A5E; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#06182E; --surface:#0A2240; --line:#1C3A5E; --text:#F5EDEC; --text2:#96D1DE;
+  --ok:#96D1DE; --err:#FF9A8F; --track:#1C3A5E; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--text);
+  font-family:"Raleway","Avenir Next",Avenir,"Proxima Nova",system-ui,sans-serif;
+  font-weight:500;font-size:17px;line-height:1.45;-webkit-text-size-adjust:100%}
+button,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+
+/* Encabezado de marca */
+header{background:var(--navy);color:#fff;padding:18px 20px 16px}
+header .in{max-width:520px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header img{height:44px;width:auto;display:block}
+.chip{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:600;color:var(--hi);white-space:nowrap}
+.chip i{width:10px;height:10px;border-radius:50%;background:#6D6E71;display:block}
+.chip[data-s="ok"] i{background:var(--hi);box-shadow:0 0 0 4px rgba(150,209,222,.25)}
+.chip[data-s="busy"] i{background:#fff}
+
+main{max-width:520px;margin:0 auto;padding:22px 20px 150px}
+h1{font-weight:800;font-size:1.65rem;line-height:1.15;margin:0;color:var(--navy);letter-spacing:-.01em}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) h1{color:#fff}}
+:root[data-theme="dark"] h1{color:#fff}
+.sub{margin:6px 0 0;color:var(--text2)}
+
+/* Elegir foto */
+.pick{margin-top:22px;width:100%;border:0;border-radius:18px;background:var(--blue);color:#fff;
+  padding:34px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.pick svg{width:52px;height:52px}
+.pick strong{font-size:1.3rem;font-weight:700}
+.pick span{font-size:.95rem;color:#fff;opacity:.92}
+
+/* Vista previa en papel */
+.preview{margin-top:20px}
+.stripwrap{display:flex;justify-content:center;background:var(--track);border-radius:18px;padding:20px 16px 28px}
+.strip{width:100%;max-width:280px;background:#fff;padding:12px 0 18px;box-shadow:0 10px 24px rgba(10,34,64,.18);
+  -webkit-mask:linear-gradient(#000 0 0) top/100% calc(100% - 8px) no-repeat,conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/12px 8px repeat-x;
+          mask:linear-gradient(#000 0 0) top/100% calc(100% - 8px) no-repeat,conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/12px 8px repeat-x}
+.strip canvas{display:block;width:100%;height:auto;image-rendering:pixelated;max-height:62vh;object-fit:contain;object-position:top}
+.tools{display:flex;justify-content:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.link{background:transparent;border:1.5px solid var(--line);border-radius:999px;padding:9px 16px;font-weight:600;color:var(--text);min-height:44px}
+.thumbs{display:flex;gap:8px;overflow-x:auto;padding:12px 0 0}
+.thumb{flex:none;width:58px;height:58px;border-radius:10px;overflow:hidden;border:3px solid transparent;padding:0;background:var(--surface)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb[aria-current="true"]{border-color:var(--blue)}
+.note{margin-top:10px;text-align:center;font-size:.92rem;color:var(--text2)}
+
+.msg{margin-top:16px;padding:12px 14px;border-radius:12px;background:var(--surface);border-left:5px solid var(--err);font-size:.97rem}
+.msg.ok{border-color:var(--ok)}
+.msg[hidden]{display:none}
+
+/* Ajustes de impresora */
+details{margin-top:34px;border-top:1px solid var(--line);padding-top:6px}
+summary{font-weight:600;min-height:48px;display:flex;align-items:center;cursor:pointer;color:var(--text2)}
+.set{margin-top:10px}
+.set label{display:block;font-weight:600;margin-bottom:6px}
+.set select{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);min-height:46px}
+.check{display:flex;gap:10px;align-items:center;min-height:46px;font-weight:500}
+.check input{width:22px;height:22px;accent-color:var(--blue)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.log{margin-top:12px;max-height:160px;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.8rem;white-space:pre-wrap;word-break:break-word;color:var(--text2)}
+
+/* Botón principal */
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+  padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px))}
+.bar .in{max-width:520px;margin:0 auto}
+.go{width:100%;border:0;border-radius:16px;background:var(--btn);color:var(--btn-ink);font-weight:700;font-size:1.2rem;min-height:60px}
+.go.stop{background:var(--navy);color:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .go.stop{background:#fff;color:var(--navy)}}
+:root[data-theme="dark"] .go.stop{background:#fff;color:var(--navy)}
+.go:disabled{opacity:.5}
+.prog{height:6px;border-radius:3px;background:var(--track);overflow:hidden;margin-bottom:10px}
+.prog[hidden]{display:none}
+.prog i{display:block;height:100%;width:0;background:var(--blue);transition:width .15s}
+@media (prefers-reduced-motion:reduce){.prog i{transition:none}}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPMAAABYAgMAAABdQymBAAAADFBMVEX////////////////1pQ5zAAAABHRSTlMAVar/oA4xLwAABrRJREFUeNrdmD1vHMcZx3+zuhdGF4AsaEMiGZMFC1U5Fu45nRsXV/BoIFDBIoUDBBGLFEkRcD7CQXCAFC6uYBBIJmAacJEAQXY/AksXKs4IFcgWgVxxkvZ4y31SzMvOLo9q3GWanX35zzwv/+dlFoD2UNsLxFfopNfaTTfkB+0n1Ma2XAD0JQNgXwySAyoVmbt1ROQSIPETgARghx17Zy/Gv/xIQ2cEwG+ATQ38wk/COJGZ3XsGoMTtrVIRkdzvKDIDUok2TwA0K/ZuJTwC6GiArgYeAnAflCbc2k+VRkVrrXj0I3sZAb8GQBm39CJG49FKA+sePYJF5mG8Bo5YQQ5/y6tI7a6IaKAvkgH7Tm8lMqedioZ7Ii/piOSsygyVmgjdExFj0RNrF4PkdEVGsHljv9DQlxvr3O3Y5KvyX8ksegZKHLonN4CaAduSWxnpi4ZW7O8dJt7hK5HJ13kHyGNgh++AeeaoUMToNf7AWrgNJt/hBcA5YDi2NNJ1kiaA5p9eGKUrk2sLAdCWw0HEGG1E3I4GzQ6TGgRQlAC8Yi3isUUrytI5fMwAw7kToySgc6dva8puY3vJSUugL6syUyKrYpBcWYYD3JOpXUXyVSl1be82BZnlb07LS4mqTNti6qcF6lkN3eKKc2vNBe12IDGFi6gShxZaOXx4GaPXmTJlAFCSrDgdUUxdRFXsyLiphXcCa5xz5RxuGHuT18Y02G8P+LaGzigc+pyBM7n7+NZ4AdzXFdqQUTiHT6g5dAn6bQZqVKF1CaXTLYcy+jQo7IiMWN4/CmiFgLhtFlXekACpXKeBl8fQDuiEAshsaJWQRzvPlVLKSLV3ATzNSLRHt8ij8DHB5OLlNsGmVj75BCL0m+FwuOcenEcmbzmI+IWsmFxHkbotdlzQF9gWjeW55T4kkispXAKcxrUHkqCSvV6VWSCWZVqbQlzCWXGsuarYUkfngeW4PPSAK7+QD/0oM3lyWLqU4Q0TPgY4YophZBN81iSPU1sK+gKM8Xq7nCpiopxKG+gFvVWDlUdUHEkMbIDhio6GR5SW4+s+aloJi3OAD3RTqGv4o2mfWgapv252LljA3ukWR0ED74V90X3x1cFW4FTkOg0V4kcRmYDIF4e2cNkyZO3YF9NE9z0R4MRODV1x2abWdbAtF020/VJ0oFTpn914j605al5VIRUUz7D1B/5tY9vd8c6jB84CRVVEgi+PAP4CUB4DfAo89gkGwLOZRPKm5Et7JtJKcBgehEncr9nHcb+Wun6t/XU54v9uKH3nq/btV42M/eEP8vSYD/bPgOHimwPgK2AoZ3Tm8vQYZ9jX2ZIlVSpSalIbmrNExLostQWx1MqFc6hWT+Zxsywil5zEaBlBWliKXiqpuA8katSu0GOAjYZyn2MT1JJXSYJUTaP2bWU8OlXWaL5KWvI43Dywl+OGYU3VtGdNdPm3cHMEr8+qYu3HwPrmz50spGsfj708TpBzeCKmstp8eJjKjLRI5Aa2ZwyHn8mb4XDg0TPYOKV90NGJyAi6ZWTzKWxKTlrckxkkF0AikWxPrk8TEdObneiuzTh/j9AzSOSGtOgGF9fQInlPZNp9I3rVnkvW6mikvBOdALvw81YntLVNo5m7oyI5l7PRy62E1o/ZWtzwVCNTd8N7OWIS6YnmxPOmLnlfdFp0rVa3JVdkJbrM0OXdmxTcXyY5KDIyvQAtd6MFdbEU7YketbVNzaGEX46WornVWSVxtfE9qPqdXoZW709WRlzwqtMlaEErnd25iLLmeAVs6GVoo263FFF4iy9qarxE8uzjh++x9ufWHPIY2FqCPu5dXlemr2/8/KuR6z3/k8G9hugtWxFfFbWWWM5AHfhfEBPXYM7B6FvotzBu1blxCCq4zGWq663L+DS3fgW0B7BxijqAUFnrGfnG5nP/h8Hz/F8NJX0pb6AvA7oneYVOL+pcy5YXsS/D7F2Nvo8a6PclAppeybq6hr51xIU3ao/BcvSEMa3aoesBwO4L7ljSc7k9ADZ4WDW5InlXSg3qppZbupJbqxlQzmquDRQdSd5eoMawkdRst3AHoOT30GlkgHGETsqMjwbtU2pZoHSm+dl9zYMGeiu2mjlGfX2tG7Yz1hO76h+Hk0a2LmL04EX9yEo4mgIXdJ7ROOF+F6N33zUb/MjoJqoMbnnZax1GZCiNAa6z/Rid2xPLlwZwFfh7BWxP3jZLg+1TllRB+7NtFlWDvtzKsU9E5o1aoqQkLWDTteoevX+7dqjnz+5s9371/IvaD8HZT+kqU/NT0H8C/gclJ6wV8rnkpAAAAABJRU5ErkJggg==" alt="Amigos for Christ">
+  <div class="chip" id="chip" data-s="off" role="status"><i></i><span id="chipTxt">Sin impresora</span></div>
+</div></header>
+
+<main>
+  <h1 id="title">Imprime una foto</h1>
+  <p class="sub" id="subtitle">Elige la foto y toca Imprimir. La app la ajusta sola.</p>
+
+  <input type="file" id="file" accept="image/*" multiple hidden>
+  <button class="pick" id="btnPick">
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="9" width="38" height="30" rx="5"/><circle cx="17" cy="20" r="4"/><path d="M5 34l11-10 9 8 6-5 12 10"/></svg>
+    <strong>Elegir foto</strong>
+    <span>De la galería, la cámara o WhatsApp</span>
+  </button>
+
+  <section class="preview" id="preview" hidden>
+    <div class="stripwrap"><div class="strip" id="strip"></div></div>
+    <div class="thumbs" id="thumbs" hidden></div>
+    <p class="note" id="note"></p>
+    <div class="tools">
+      <button class="link" id="btnOther">Cambiar foto</button>
+      <button class="link" id="btnRot">Girar</button>
+    </div>
+  </section>
+
+  <div class="msg" id="msg" hidden role="status"></div>
+
+  <details>
+    <summary>Ajustes de la impresora</summary>
+    <div class="set">
+      <label for="paper">Ancho del papel</label>
+      <select id="paper">
+        <option value="58">58 mm (2") — SPP-R200, R210, R220</option>
+        <option value="80">80 mm (3") — SPP-R300, R310</option>
+        <option value="112">112 mm (4") — SPP-R400, R410</option>
+      </select>
+    </div>
+    <label class="check"><input type="checkbox" id="compat"> Modo compatible (si la foto no sale)</label>
+    <label class="check"><input type="checkbox" id="slow"> Envío lento (si la impresión se corta)</label>
+    <div class="row">
+      <button class="link" id="btnTest">Imprimir prueba</button>
+      <button class="link" id="btnConn">Cambiar impresora</button>
+      <button class="link" id="btnDisc">Desconectar</button>
+    </div>
+    <div class="log" id="log" aria-live="polite"></div>
+  </details>
+</main>
+
+<div class="bar"><div class="in">
+  <div class="prog" id="prog" hidden><i id="progBar"></i></div>
+  <button class="go" id="go">Elegir foto</button>
+</div></div>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const SPP = '00001101-0000-1000-8000-00805f9b34fb';
+const DOTS = { '58': 384, '80': 576, '112': 832 };
+const KEY = 'amigos-bixolon-v1';
+const DEF = { paper: '58', compat: false, slow: false };
+
+let S = Object.assign({}, DEF);
+try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+let port = null, writer = null, busy = false, cancelled = false, printedOnce = false;
+let items = [], sel = 0;
+
+/* ---------- Mensajes ---------- */
+function log(t) { const el = $('#log'); el.textContent = `[${new Date().toLocaleTimeString()}] ${t}\n` + el.textContent; }
+function msg(text, ok) {
+  const m = $('#msg');
+  if (!text) { m.hidden = true; return; }
+  m.textContent = text; m.className = 'msg' + (ok ? ' ok' : ''); m.hidden = false;
+}
+function chip(state, text) { $('#chip').dataset.s = state; $('#chipTxt').textContent = text; }
+function diag() {
+  const ua = navigator.userAgent;
+  return `Chrome ${(ua.match(/Chrome\/(\d+)/) || [])[1] || '?'}, Android ${(ua.match(/Android ([\d.]+)/) || [])[1] || '?'}`;
+}
+
+/* ---------- Conexión Bluetooth ---------- */
+async function openPort(p, quiet) {
+  chip('busy', 'Conectando…');
+  try { await p.open({ baudRate: 115200 }); }
+  catch (e) {
+    log('Abrir: ' + e.name + ' ' + e.message);
+    chip('off', 'Sin impresora');
+    if (!quiet) msg('No se pudo conectar. Revisa que la impresora esté encendida y cerca, y que mPrint esté cerrada.');
+    return false;
+  }
+  port = p; writer = p.writable.getWriter();
+  chip('ok', 'Impresora lista'); msg(''); log('Conectada.');
+  render();
+  return true;
+}
+
+let searchLevel = 0;
+async function connect() {
+  if (!('serial' in navigator)) {
+    msg('Abre esta app en Google Chrome para Android (versión 137 o más nueva). En iPhone no se puede imprimir por Bluetooth. (' + diag() + ')');
+    return false;
+  }
+  await disconnect(true);
+  const opts = searchLevel === 0
+    ? { filters: [{ bluetoothServiceClassId: SPP }], allowedBluetoothServiceClassIds: [SPP] }
+    : { allowedBluetoothServiceClassIds: [SPP] };
+  const t0 = Date.now();
+  try {
+    const p = await navigator.serial.requestPort(opts);
+    return await openPort(p);
+  } catch (e) {
+    const fast = Date.now() - t0 < 1500;
+    log(`Búsqueda ${searchLevel ? 'amplia' : 'normal'}: ${e.name} ${e.message} (${diag()})`);
+    chip('off', 'Sin impresora');
+    if (e.name === 'NotFoundError' && fast && searchLevel === 0) {
+      searchLevel = 1;
+      msg('No apareció la impresora. Toca el botón otra vez para buscar en todos los dispositivos.');
+    } else if (e.name === 'NotFoundError' && fast) {
+      msg('Chrome no ve dispositivos Bluetooth. Ve a Ajustes > Apps > Chrome > Permisos > Dispositivos cercanos > Permitir, y vuelve a abrir la app.');
+    } else if (e.name === 'NotFoundError') {
+      msg('No elegiste impresora. Si no está en la lista, emparéjala primero en Ajustes > Bluetooth (clave 0000).');
+    } else if (e.name === 'SecurityError' || e.name === 'NotAllowedError') {
+      msg('Chrome no tiene permiso de Bluetooth. Ve a Ajustes > Apps > Chrome > Permisos > Dispositivos cercanos > Permitir.');
+    } else {
+      msg('No se pudo buscar la impresora: ' + e.message);
+    }
+    return false;
+  }
+}
+
+async function disconnect(quiet) {
+  try { if (writer) writer.releaseLock(); } catch (e) {}
+  try { if (port) await port.close(); } catch (e) {}
+  writer = null; port = null;
+  if (!quiet) { chip('off', 'Sin impresora'); log('Desconectada.'); render(); }
+}
+
+async function autoReconnect() {
+  if (!('serial' in navigator)) return;
+  try {
+    const ports = await navigator.serial.getPorts();
+    if (ports.length) await openPort(ports[0], true);
+  } catch (e) { log('Reconexión: ' + e.message); }
+  render();
+}
+
+/* ---------- Envío ---------- */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function concat(parts) {
+  let n = 0; for (const p of parts) n += p.length;
+  const out = new Uint8Array(n); let o = 0;
+  for (const p of parts) { out.set(p, o); o += p.length; }
+  return out;
+}
+async function send(bytes, onProgress) {
+  const chunk = S.slow ? 128 : 512, delay = S.slow ? 40 : 15;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    if (cancelled) throw new Error('cancelado');
+    await writer.ready;
+    await writer.write(bytes.subarray(i, i + chunk));
+    if (delay) await sleep(delay);
+    onProgress && onProgress(Math.min(1, (i + chunk) / bytes.length));
+  }
+}
+
+/* ---------- Procesamiento automático de imagen ---------- */
+function prescale(src, sw, sh, tw, th) {
+  const key = tw + 'x' + th;
+  if (src._pre && src._pre.key === key) return src._pre.canvas;
+  let img = src, cw = sw, ch = sh;
+  while (cw / 2 >= tw * 1.5 && ch / 2 >= th * 1.5) {
+    const nw = Math.round(cw / 2), nh = Math.round(ch / 2);
+    const t = document.createElement('canvas'); t.width = nw; t.height = nh;
+    const tg = t.getContext('2d'); tg.imageSmoothingEnabled = true; tg.imageSmoothingQuality = 'high';
+    tg.drawImage(img, 0, 0, nw, nh);
+    img = t; cw = nw; ch = nh;
+  }
+  try { src._pre = { key, canvas: img }; } catch (e) {}
+  return img;
+}
+
+function rasterize(it, width) {
+  const src = it.img, W = width || DOTS[S.paper];
+  const r = ((it.rotate || 0) % 360 + 360) % 360;
+  const sw = src.naturalWidth || src.width, sh = src.naturalHeight || src.height;
+  const side = r % 180 ? sh : sw, other = r % 180 ? sw : sh;
+  const scale = W / side;
+  const H = Math.max(1, Math.min(30000, Math.round(other * scale)));
+  const tw = Math.max(1, Math.round(sw * scale)), th = Math.max(1, Math.round(sh * scale));
+  const pre = prescale(src, sw, sh, tw, th);
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+  g.translate(W / 2, H / 2); g.rotate(r * Math.PI / 180);
+  g.drawImage(pre, -tw / 2, -th / 2, tw, th);
+  return toBits(g.getImageData(0, 0, W, H).data, W, H);
+}
+
+function blur121(a, W, H) {
+  const t = new Float32Array(a.length), o = new Float32Array(a.length);
+  for (let y = 0; y < H; y++) {
+    const r = y * W;
+    for (let x = 0; x < W; x++) t[r + x] = (a[r + (x > 0 ? x - 1 : x)] + 2 * a[r + x] + a[r + (x < W - 1 ? x + 1 : x)]) / 4;
+  }
+  for (let y = 0; y < H; y++) {
+    const u = (y > 0 ? y - 1 : y) * W, c = y * W, d = (y < H - 1 ? y + 1 : y) * W;
+    for (let x = 0; x < W; x++) o[c + x] = (t[u + x] + 2 * t[c + x] + t[d + x]) / 4;
+  }
+  return o;
+}
+
+function otsu(hist, N) {
+  let sum = 0; for (let i = 0; i < 256; i++) sum += i * hist[i];
+  let sumB = 0, wB = 0, best = 0, t = 128;
+  for (let i = 0; i < 256; i++) {
+    wB += hist[i]; if (!wB) continue;
+    const wF = N - wB; if (!wF) break;
+    sumB += i * hist[i];
+    const mB = sumB / wB, mF = (sum - sumB) / wF, v = wB * wF * (mB - mF) * (mB - mF);
+    if (v > best) { best = v; t = i; }
+  }
+  return t;
+}
+
+// Decide sola si es foto o texto/logo y aplica el mejor ajuste: nadie tiene que mover nada.
+function toBits(d, W, H) {
+  const N = W * H, gray = new Float32Array(N), hist = new Uint32Array(256);
+  for (let i = 0, j = 0; i < N; i++, j += 4) {
+    let v = 0.299 * d[j] + 0.587 * d[j + 1] + 0.114 * d[j + 2];
+    if (d[j + 3] < 255) v = 255 - (255 - v) * d[j + 3] / 255;   // lo transparente se vuelve blanco
+    gray[i] = v; hist[v | 0]++;
+  }
+  let mid = 0; for (let v = 48; v < 208; v++) mid += hist[v];
+  const graphic = mid / N < 0.15;
+  const bits = new Uint8Array(N);
+
+  if (graphic) {
+    // Texto, logos, códigos QR: blanco y negro puro, bordes limpios
+    const t = Math.min(200, Math.max(70, otsu(hist, N)));
+    for (let i = 0; i < N; i++) bits[i] = gray[i] < t ? 1 : 0;
+    return { W, H, bits, kind: 'texto' };
+  }
+
+  // Foto: niveles automáticos, nitidez, aclarado de tonos medios y tramado limpio
+  const pct = p => { let acc = 0; const tgt = N * p; for (let v = 0; v < 256; v++) { acc += hist[v]; if (acc >= tgt) return v; } return 255; };
+  const lo = pct(0.01), hi = Math.max(pct(0.99), lo + 40), k = 255 / (hi - lo);
+  const bl = blur121(gray, W, H);
+  for (let i = 0; i < N; i++) {
+    let v = gray[i] + 1.1 * (gray[i] - bl[i]);
+    v = (v - lo) * k;
+    v = v < 0 ? 0 : v > 255 ? 255 : v;
+    gray[i] = 255 * Math.pow(v / 255, 0.8);
+  }
+  const add = (x, y, e) => { if (x >= 0 && x < W && y < H) gray[y * W + x] += e; };
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = y * W + x, old = gray[i], nw = old < 128 ? 0 : 255;
+    bits[i] = nw ? 0 : 1;
+    const a = (old - nw) / 8;
+    add(x + 1, y, a); add(x + 2, y, a); add(x - 1, y + 1, a); add(x, y + 1, a); add(x + 1, y + 1, a); add(x, y + 2, a);
+  }
+  return { W, H, bits, kind: 'foto' };
+}
+
+/* ---------- Comandos ESC/POS ---------- */
+function rasterGSv0(R) {
+  const bpr = R.W >> 3, BAND = 64, parts = [];
+  for (let y0 = 0; y0 < R.H; y0 += BAND) {
+    const h = Math.min(BAND, R.H - y0), buf = new Uint8Array(8 + bpr * h);
+    buf.set([0x1D, 0x76, 0x30, 0x00, bpr & 255, bpr >> 8, h & 255, h >> 8]);
+    for (let y = 0; y < h; y++) {
+      const row = (y0 + y) * R.W;
+      for (let xb = 0; xb < bpr; xb++) {
+        let v = 0; const base = row + xb * 8;
+        for (let k = 0; k < 8; k++) if (R.bits[base + k]) v |= 0x80 >> k;
+        buf[8 + y * bpr + xb] = v;
+      }
+    }
+    parts.push(buf);
+  }
+  return parts;
+}
+function rasterEscStar(R) {
+  const parts = [new Uint8Array([0x1B, 0x33, 24])], n = R.W;
+  for (let y0 = 0; y0 < R.H; y0 += 24) {
+    const buf = new Uint8Array(5 + n * 3 + 1);
+    buf.set([0x1B, 0x2A, 33, n & 255, n >> 8]);
+    for (let x = 0; x < n; x++) for (let k = 0; k < 3; k++) {
+      let v = 0;
+      for (let b = 0; b < 8; b++) { const y = y0 + k * 8 + b; if (y < R.H && R.bits[y * R.W + x]) v |= 0x80 >> b; }
+      buf[5 + x * 3 + k] = v;
+    }
+    buf[buf.length - 1] = 0x0A;
+    parts.push(buf);
+  }
+  parts.push(new Uint8Array([0x1B, 0x32]));
+  return parts;
+}
+function job(R, extra) {
+  const parts = [new Uint8Array([0x1B, 0x40])];
+  if (extra) parts.push(extra);
+  parts.push(...(S.compat ? rasterEscStar(R) : rasterGSv0(R)));
+  parts.push(new Uint8Array([0x1B, 0x64, 4]));
+  return concat(parts);
+}
+
+/* ---------- Pantalla ---------- */
+let pending = 0;
+function drawPreview() {
+  cancelAnimationFrame(pending);
+  pending = requestAnimationFrame(() => {
+    if (!items.length) return;
+    const R = rasterize(items[sel]);
+    const c = document.createElement('canvas'); c.width = R.W; c.height = R.H;
+    const g = c.getContext('2d'), id = g.createImageData(R.W, R.H);
+    for (let i = 0, j = 0; i < R.bits.length; i++, j += 4) {
+      const v = R.bits[i] ? 30 : 255; id.data[j] = id.data[j + 1] = id.data[j + 2] = v; id.data[j + 3] = 255;
+    }
+    g.putImageData(id, 0, 0);
+    c.setAttribute('role', 'img'); c.setAttribute('aria-label', 'Así saldrá impresa');
+    $('#strip').replaceChildren(c);
+    const cm = (R.H / 80).toFixed(1);
+    $('#note').textContent = (R.kind === 'foto' ? 'Ajustada como foto' : 'Ajustada como texto o logo') + `. Usará unos ${cm} cm de papel.`;
+  });
+}
+
+function renderThumbs() {
+  const t = $('#thumbs');
+  t.hidden = items.length < 2;
+  t.replaceChildren(...items.map((it, i) => {
+    const b = document.createElement('button');
+    b.className = 'thumb'; b.setAttribute('aria-current', i === sel); b.setAttribute('aria-label', 'Ver foto ' + (i + 1));
+    const im = document.createElement('img'); im.src = it.url; im.alt = '';
+    b.append(im); b.onclick = () => { sel = i; renderThumbs(); drawPreview(); };
+    return b;
+  }));
+}
+
+function render() {
+  const has = items.length > 0;
+  $('#btnPick').hidden = has;
+  $('#preview').hidden = !has;
+  $('#title').textContent = has ? (items.length > 1 ? `${items.length} fotos listas` : 'Foto lista') : 'Imprime una foto';
+  $('#subtitle').textContent = has ? 'Así saldrá en el papel.' : 'Elige la foto y toca Imprimir. La app la ajusta sola.';
+  const go = $('#go');
+  go.classList.toggle('stop', busy);
+  if (busy) { go.textContent = 'Cancelar'; return; }
+  if (!has) go.textContent = 'Elegir foto';
+  else if (!writer) go.textContent = 'Conectar e imprimir';
+  else go.textContent = printedOnce ? 'Imprimir otra vez' : (items.length > 1 ? `Imprimir ${items.length} fotos` : 'Imprimir');
+}
+
+async function addFiles(files) {
+  const added = [];
+  for (const f of files) {
+    if (!f.type.startsWith('image/')) continue;
+    const url = URL.createObjectURL(f), img = new Image();
+    img.src = url;
+    try { await img.decode(); added.push({ url, img, rotate: 0 }); }
+    catch (e) { URL.revokeObjectURL(url); msg('No se pudo abrir esa foto. Si es de iPhone (HEIC), compártela como JPG.'); }
+  }
+  if (!added.length) return;
+  items.forEach(it => URL.revokeObjectURL(it.url));
+  items = added; sel = 0; printedOnce = false; msg('');
+  renderThumbs(); render(); drawPreview();
+}
+
+/* ---------- Imprimir ---------- */
+async function run(jobs) {
+  busy = true; cancelled = false; render();
+  const prog = $('#prog'), bar = $('#progBar'); prog.hidden = false; bar.style.width = '0';
+  let lock = null; try { lock = await navigator.wakeLock?.request('screen'); } catch (e) {}
+  chip('busy', 'Imprimiendo…');
+  let ok = false;
+  try {
+    for (let i = 0; i < jobs.length; i++) {
+      const bytes = jobs[i]();
+      log(`Enviando ${i + 1}/${jobs.length}: ${bytes.length} bytes`);
+      await send(bytes, p => { bar.style.width = ((i + p) / jobs.length * 100) + '%'; });
+    }
+    ok = true; msg('Listo, ya se imprimió.', true);
+    chip('ok', 'Impresora lista');
+  } catch (e) {
+    log('Fallo: ' + e.name + ' ' + e.message);
+    if (e.message === 'cancelado') { msg('Impresión cancelada.'); chip('ok', 'Impresora lista'); }
+    else { msg('Se perdió la conexión con la impresora. Revisa la batería y la distancia, y toca el botón otra vez.'); await disconnect(true); chip('off', 'Sin impresora'); }
+  } finally {
+    busy = false; prog.hidden = true; try { lock && lock.release(); } catch (e) {}
+    if (ok) printedOnce = true;
+    render();
+  }
+}
+
+async function goPressed() {
+  if (busy) { cancelled = true; return; }
+  if (!items.length) { $('#file').click(); return; }
+  if (!writer && !(await connect())) return;
+  const list = items.slice();
+  run(list.map(it => () => job(rasterize(it))));
+}
+
+function printTest() {
+  const W = DOTS[S.paper], H = 240, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+  g.fillStyle = '#000'; g.fillRect(0, 0, W, 4); g.fillRect(0, 0, 4, H); g.fillRect(W - 4, 0, 4, H); g.fillRect(0, H - 4, W, 4);
+  g.font = `bold ${Math.round(W / 11)}px sans-serif`; g.fillText('Prueba Bixolon', 14, 62);
+  g.font = `${Math.round(W / 20)}px sans-serif`; g.fillText(`Papel ${S.paper} mm`, 14, 100);
+  const grad = g.createLinearGradient(14, 0, W - 14, 0); grad.addColorStop(0, '#000'); grad.addColorStop(1, '#fff');
+  g.fillStyle = grad; g.fillRect(14, 126, W - 28, 80);
+  const R = toBits(g.getImageData(0, 0, W, H).data, W, H);
+  const txt = new TextEncoder().encode('Texto OK. Si no sale el cuadro,\nactive Modo compatible.\n\n');
+  run([() => job(R, txt)]);
+}
+
+/* ---------- Controles ---------- */
+$('#paper').value = S.paper;
+$('#compat').checked = S.compat;
+$('#slow').checked = S.slow;
+$('#paper').onchange = e => { S.paper = e.target.value; save(); drawPreview(); };
+$('#compat').onchange = e => { S.compat = e.target.checked; save(); };
+$('#slow').onchange = e => { S.slow = e.target.checked; save(); };
+$('#btnPick').onclick = () => $('#file').click();
+$('#btnOther').onclick = () => $('#file').click();
+$('#file').onchange = e => { addFiles([...e.target.files]); e.target.value = ''; };
+$('#btnRot').onclick = () => { const it = items[sel]; if (!it) return; it.rotate = (it.rotate + 90) % 360; printedOnce = false; render(); drawPreview(); };
+$('#go').onclick = goPressed;
+$('#btnTest').onclick = async () => { if (busy) return; if (!writer && !(await connect())) return; printTest(); };
+$('#btnConn').onclick = () => { if (!busy) connect(); };
+$('#btnDisc').onclick = () => disconnect();
+document.addEventListener('paste', e => { const f = [...(e.clipboardData?.files || [])]; if (f.length) addFiles(f); });
+
+render();
+autoReconnect();
+
+/* ---------- Sin internet e imágenes compartidas ---------- */
+if ('serviceWorker' in navigator && location.protocol === 'https:' && !location.hostname.endsWith('claude.ai')) {
+  navigator.serviceWorker.register('./sw.js').then(() => log('Lista para usar sin internet.')).catch(e => log('Sin modo offline: ' + e.message));
+}
+(async () => {
+  if (!new URLSearchParams(location.search).has('share') || !('caches' in window)) return;
+  try {
+    const c = await caches.open('compartidas'), files = [];
+    for (const k of await c.keys()) {
+      const r = await c.match(k), b = await r.blob();
+      files.push(new File([b], decodeURIComponent(r.headers.get('x-name') || 'imagen'), { type: b.type }));
+      await c.delete(k);
+    }
+    history.replaceState(null, '', location.pathname);
+    if (files.length) addFiles(files);
+  } catch (e) { log('No se pudieron leer las fotos compartidas: ' + e.message); }
+})();
+})();
+</script>
+</body>
+</html>
